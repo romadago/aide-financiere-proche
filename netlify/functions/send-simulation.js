@@ -1,5 +1,5 @@
 // Fichier : netlify/functions/send-simulation.js
-// Mis à jour pour gérer plusieurs thèmes de simulateurs
+// Version corrigée et étendue pour gérer tous les thèmes de simulateurs
 
 const { Resend } = require('resend');
 
@@ -14,7 +14,21 @@ const emailTemplates = {
         title: "le résumé de votre projet d'aide financière",
         objectiveLabel: "Aide mensuelle à verser",
     },
-    // Ajoutez d'autres thèmes ici si nécessaire
+    'Études enfant': {
+        subject: `Votre simulation pour les études de votre enfant`,
+        title: "le résumé de votre projet pour les études de votre enfant",
+        objectiveLabel: "Revenu mensuel pour ses études",
+    },
+    'Retraite': {
+        subject: `Votre simulation de retraite complémentaire`,
+        title: "le résumé de votre projet de retraite",
+        objectiveLabel: "Revenu mensuel souhaité à la retraite",
+    },
+    'Année sabbatique': {
+        subject: `Votre simulation pour votre année sabbatique`,
+        title: "le résumé de votre projet d'année sabbatique",
+        objectiveLabel: "Budget mensuel nécessaire",
+    },
 };
 
 
@@ -28,6 +42,16 @@ exports.handler = async function(event) {
     const body = JSON.parse(event.body);
     
     const { email, data, theme } = body;
+
+    // --- Contrôle de sécurité des données ---
+    if (!data || typeof data.objectifs === 'undefined' || typeof data.resultats === 'undefined') {
+        console.error("Données de simulation manquantes ou mal formatées :", body);
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ error: "Données de simulation invalides." }),
+        };
+    }
+    
     const { objectifs, resultats } = data;
 
     const template = emailTemplates[theme] || emailTemplates['default'];
@@ -83,4 +107,3 @@ exports.handler = async function(event) {
     };
   }
 };
-```
